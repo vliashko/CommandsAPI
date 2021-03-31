@@ -24,13 +24,36 @@ namespace CommandAPI.Controllers
             var commands = repository.GetAllCommands();
             return Ok(mapper.Map<IEnumerable<CommandReadDto>>(commands));
         }
-        [HttpGet("{id}")]
+        [HttpGet("{id}", Name = "GetCommandById")]
         public ActionResult<CommandReadDto> GetCommandById(int id)
         {
             var command = repository.GetCommandById(id);
             if(command == null)
                 return NotFound();
             return Ok(mapper.Map<CommandReadDto>(command));
+        }
+        [HttpPost]
+        public ActionResult<CommandReadDto> CreateCommand(CommandCreateDto commandCreateDto)
+        {
+            var commandModel = mapper.Map<Command>(commandCreateDto);
+            repository.CreateCommand(commandModel);
+            repository.SaveChanges();
+
+            var commandReadDto = mapper.Map<CommandReadDto>(commandModel);
+            return CreatedAtRoute(nameof(GetCommandById), new { Id = commandReadDto.Id }, commandReadDto);
+        }
+        [HttpPut("{id}")]
+        public ActionResult UpdateCommand(int id, CommandUpdateDto commandUpdateDto)
+        {
+            var commandFromRepo = repository.GetCommandById(id);
+            if(commandFromRepo == null)
+            {
+                return NotFound();
+            }
+            mapper.Map(commandUpdateDto, commandFromRepo);
+            repository.UpdateCommand(commandFromRepo);
+            repository.SaveChanges();
+            return NoContent();
         }
     }
 }
