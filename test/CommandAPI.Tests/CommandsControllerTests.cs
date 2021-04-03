@@ -81,6 +81,53 @@ namespace CommandAPI.Tests
             
             Assert.IsType<ActionResult<IEnumerable<CommandReadDto>>>(result);
         }
+        [Fact]
+        public void GetCommandById_Returns404NotFound_WhenNonExistentIDProvided()
+        {
+            mockRepo.Setup(repo => repo.GetCommandById(0)).Returns(() => null);
+
+            var controller = new CommandsController(mockRepo.Object, mapper);
+
+            var result = controller.GetCommandById(1);
+
+            Assert.IsType<NotFoundResult>(result.Result);
+        }
+        [Fact]
+        public void GetCommandById_Returns200OK_WhenValidIDProvided()
+        {
+            mockRepo.Setup(repo =>
+                repo.GetCommandById(1)).Returns(
+                    new Command 
+                    { 
+                        Id = 1,
+                        HowTo = "mock",
+                        Platform = "Mock",
+                        CommandLine = "Mock" 
+                    });
+            var controller = new CommandsController(mockRepo.Object, mapper);
+
+            var result = controller.GetCommandById(1);
+
+            Assert.IsType<OkObjectResult>(result.Result);
+        }
+        [Fact]
+        public void GetCommandById_ReturnsCorrectType_WhenValidIDProvided()
+        {
+            mockRepo.Setup(repo =>
+                repo.GetCommandById(1)).Returns(
+                    new Command 
+                    { 
+                        Id = 1,
+                        HowTo = "mock",
+                        Platform = "Mock",
+                        CommandLine = "Mock" 
+                    });
+            var controller = new CommandsController(mockRepo.Object, mapper);
+
+            var result = controller.GetCommandById(1);
+
+            Assert.IsType<ActionResult<CommandReadDto>>(result);
+        }
         private List<Command> GetCommands(int num)
         {
             var commands = new List<Command>();
