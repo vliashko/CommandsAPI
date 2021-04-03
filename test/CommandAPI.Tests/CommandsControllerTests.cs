@@ -166,6 +166,36 @@ namespace CommandAPI.Tests
 
             Assert.IsType<CreatedAtRouteResult>(result.Result);
         }
+        [Fact]
+        public void UpdateCommand_Returns204NoContent_WhenValidObjectSubmitted()
+        {
+            mockRepo.Setup(repo =>
+                repo.GetCommandById(1)).Returns(
+                    new Command 
+                    { 
+                        Id = 1,
+                        HowTo = "mock",
+                        Platform = "Mock",
+                        CommandLine = "Mock" 
+                    });
+            
+            var controller = new CommandsController(mockRepo.Object, mapper);
+
+            var result = controller.UpdateCommand(1, new CommandUpdateDto {  });
+
+            Assert.IsType<NoContentResult>(result);
+        }
+        [Fact]
+        public void UpdateCommand_Returns404NotFound_WhenNonExistentResourceIDSubmitted()
+        {
+            mockRepo.Setup(repo => repo.GetCommandById(0)).Returns(() => null);
+
+            var controller = new CommandsController(mockRepo.Object, mapper);
+
+            var result = controller.UpdateCommand(0, new CommandUpdateDto {  });
+
+            Assert.IsType<NotFoundResult>(result);
+        }
         private List<Command> GetCommands(int num)
         {
             var commands = new List<Command>();
